@@ -175,6 +175,24 @@ body{font-family:'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, san
   </div>
 </div>
 
+<div class="modal-bg" id="modal-schedule">
+  <div class="modal">
+    <div class="topbar-title" style="margin-bottom:24px">방문 일정 예약</div>
+    <div class="form-group">
+      <label class="form-label">어르신 선택</label>
+      <select id="sc-senior"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">방문 날짜</label>
+      <input type="date" id="sc-date">
+    </div>
+    <div style="display:flex; gap:16px">
+      <button class="btn-add" style="background:var(--border); color:var(--text-main)" onclick="closeModal('schedule')">닫기</button>
+      <button class="btn-add" onclick="saveSchedule()">저장하기</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -217,7 +235,30 @@ function renderSeniors(list){
 
 function renderHome(){
   const seniors = loadSeniors();
+  const schedules = loadSchedules();
+  const today = new Date().toISOString().slice(0,10);
+  const todaySchedules = schedules.filter(s => s.date === today);
   document.getElementById('cnt-total').textContent = seniors.length;
+  document.getElementById('cnt-today').textContent = todaySchedules.length;
+  const homeEl = document.getElementById('home-sched-list');
+  if(!todaySchedules.length){
+    homeEl.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--text-sub)">일정이 없습니다.</div>';
+    return;
+  }
+  homeEl.innerHTML = todaySchedules.map(s => `<div class="sched-item"><div><div class="sched-time">오늘 방문</div><div class="sched-name">${s.name} 어르신</div></div></div>`).join('');
+}
+
+const loadSchedules=()=>{try{return JSON.parse(localStorage.getItem(LS_SC)||'[]')}catch{return[]}};
+const saveSchedules=l=>localStorage.setItem(LS_SC,JSON.stringify(l));
+
+function renderSchedules(){
+  const el = document.getElementById('schedule-list');
+  const schedules = loadSchedules().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!schedules.length){
+    el.innerHTML = '<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 일정이 없습니다.</div>';
+    return;
+  }
+  el.innerHTML = schedules.map(s => `<div class="sched-item"><div><div class="sched-time">${s.date}</div><div class="sched-name">${s.name} 어르신</div></div></div>`).join('');
 }
 
 function saveSenior(){
@@ -236,8 +277,39 @@ function saveSenior(){
 function openAddModal(type){ document.getElementById('modal-'+type).classList.add('open'); }
 function closeModal(type){ document.getElementById('modal-'+type).classList.remove('open'); }
 
+function saveSchedule(){
+  const name = document.getElementById('sc-senior').value;
+  const date = document.getElementById('sc-date').value;
+  if(!name){alert('어르신을 먼저 등록해주세요.'); return;}
+  if(!date){alert('방문 날짜를 선택해주세요.'); return;}
+  const list = loadSchedules();
+  list.push({id:Date.now(), name, date});
+  saveSchedules(list);
+  closeModal('schedule');
+  renderSchedules();
+  renderHome();
+  toast('방문 일정이 저장되었습니다!');
+}
+
+function fillScheduleSeniorOptions(){
+  const select = document.getElementById('sc-senior');
+  const seniors = loadSeniors();
+  if(!seniors.length){
+    select.innerHTML = '<option value="">등록된 어르신 없음</option>';
+    return;
+  }
+  select.innerHTML = seniors.map(s=>`<option value="${s.name}">${s.name} 어르신</option>`).join('');
+}
+
+const _openAddModal = openAddModal;
+openAddModal = function(type){
+  if(type==='schedule') fillScheduleSeniorOptions();
+  _openAddModal(type);
+}
+
 // 초기 실행
 renderHome();
+renderSchedules();
 </script>
 </body>
 </html>
