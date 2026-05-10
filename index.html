@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재가복지 스마트 케어 — 소양강댐노인복지관</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+/* 디자인 시스템 및 변수 - 고대비 및 가독성 중심 */
+:root {
+  --primary: #185FA5;
+  --primary-light: #E6F1FB;
+  --bg-main: #F8F9FA;
+  --bg-card: #FFFFFF;
+  --text-main: #1A1A1A;
+  --text-sub: #5F6368;
+  --border: #DADCE0;
+  --danger: #D93025;
+  --success: #188038;
+  --warning: #F29900;
+  --shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px rgba(60,64,67,0.15);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background:var(--bg-main); color:var(--text-main); line-height: 1.6; -webkit-tap-highlight-color: transparent;}
+
+/* 앱 컨테이너 - 모바일 대응 */
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:500px;margin:0 auto;background:var(--bg-main);position:relative;box-shadow: 0 0 20px rgba(0,0,0,0.05)}
+
+/* 상단 헤더 - 소양강댐노인복지관 아이덴티티 강조 */
+.topbar{background:var(--bg-card); padding:20px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border)}
+.topbar-title{font-size:22px; font-weight:800; color:var(--primary); letter-spacing:-0.5px}
+.topbar-sub{font-size:14px; color:var(--text-sub); margin-top:2px; font-weight:500}
+
+/* 내비게이션 바 - 큰 아이콘과 텍스트 */
+.nav{display:flex; background:var(--bg-card); padding:10px 16px; gap:8px; border-bottom:1px solid var(--border); position:sticky; top:75px; z-index:90}
+.nav-btn{flex:1; padding:12px 0; font-size:13px; color:var(--text-sub); background:none; border:none; cursor:pointer; border-radius:12px; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; gap:6px}
+.nav-btn i{font-size:24px}
+.nav-btn.active{background:var(--primary-light); color:var(--primary); font-weight:700}
+
+.content{flex:1; padding:20px}
+.section{display:none; animation: fadeIn 0.3s ease-out}
+.section.active{display:block}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 카드 디자인 - 정보 가독성 극대화 */
+.card{background:var(--bg-card); border-radius:24px; padding:24px; margin-bottom:20px; border:1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05)}
+.card-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px}
+.card-title{font-size:18px; font-weight:700; color:var(--text-main)}
+
+/* 통계 그리드 - 시원한 수치 표시 */
+.stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:24px}
+.stat-card{background:var(--bg-card); border-radius:24px; padding:20px; border:1px solid var(--border); display:flex; flex-direction:column; align-items:center; text-align:center}
+.stat-num{font-size:32px; font-weight:900; margin-bottom:4px}
+.stat-label{font-size:14px; color:var(--text-sub); font-weight:600}
+
+/* 버튼 스타일 - 큰 터치 영역 */
+.btn-add{width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:var(--primary); color:#fff; border:none; border-radius:16px; padding:18px; font-size:17px; font-weight:700; cursor:pointer; margin-bottom:20px; box-shadow: 0 4px 12px rgba(24, 95, 165, 0.2)}
+.btn-add:active{transform: scale(0.97)}
+
+/* 검색 바 */
+.search-bar{display:flex; align-items:center; gap:12px; background:#fff; border:2px solid var(--border); border-radius:16px; padding:14px 20px; margin-bottom:20px}
+.search-bar:focus-within{border-color: var(--primary)}
+.search-bar input{border:none; background:none; flex:1; font-size:16px; outline:none; font-weight:500}
+
+/* 리스트 아이템 디자인 */
+.person-row{display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); cursor:pointer}
+.avatar{width:56px; height:56px; border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; flex-shrink:0}
+.av-blue{background:var(--primary-light); color:var(--primary)}
+.person-info{flex:1}
+.person-name{font-size:18px; font-weight:700; margin-bottom:4px}
+.person-sub{font-size:14px; color:var(--text-sub)}
+
+/* 일정 아이템 */
+.sched-item{background:#fff; border-radius:20px; padding:20px; margin-bottom:12px; border:1px solid var(--border); display:flex; align-items:center; gap:16px}
+.sched-time{font-size:14px; color:var(--primary); font-weight:800; margin-bottom:4px}
+.sched-name{font-size:17px; font-weight:700}
+
+/* 뱃지 */
+.badge{padding:6px 12px; border-radius:10px; font-size:13px; font-weight:700}
+.badge-green{background:#E6F4EA; color:#137333}
+.badge-red{background:#FCE8E6; color:#C5221F}
+.badge-gray{background:#F1F3F4; color:#5F6368}
+
+/* 모달 및 폼 */
+.modal-bg{display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:flex-end; justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff; border-radius:32px 32px 0 0; padding:32px 24px; width:100%; max-width:500px; animation: slideUp 0.3s ease-out}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.form-group{margin-bottom:20px}
+.form-label{font-size:15px; font-weight:700; margin-bottom:8px; display:block; color:var(--text-main)}
+.form-group input, .form-group select, .form-group textarea{
+    width:100%; font-size:16px; padding:16px; border:2px solid var(--border); border-radius:16px; outline:none; background:#F8F9FA
+}
+.form-group input:focus{border-color:var(--primary); background:#fff}
+
+/* 토스트 */
+.toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:14px 28px; border-radius:20px; font-size:15px; font-weight:600; z-index:2000; opacity:0; transition:0.3s; pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">스마트 케어</div>
+      <div class="topbar-sub">소양강댐노인복지관</div>
+    </div>
+    <div style="background:var(--bg-main); padding:10px; border-radius:14px">
+        <i class="ti ti-bell" style="font-size:24px;color:var(--primary)"></i>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('home')"><i class="ti ti-smart-home"></i>홈</button>
+    <button class="nav-btn" onclick="showTab('seniors')"><i class="ti ti-users"></i>어르신</button>
+    <button class="nav-btn" onclick="showTab('schedule')"><i class="ti ti-calendar-event"></i>일정</button>
+    <button class="nav-btn" onclick="showTab('health')"><i class="ti ti-heart-rate-monitor"></i>건강</button>
+    <button class="nav-btn" onclick="showTab('emergency')"><i class="ti ti-phone-call"></i>긴급</button>
+  </div>
+
+  <div class="content">
+    <div class="section active" id="sec-home">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="cnt-total" style="color:var(--text-main)">0</div><div class="stat-label">전체 인원</div></div>
+        <div class="stat-card"><div class="stat-num" id="cnt-today" style="color:var(--primary)">0</div><div class="stat-label">오늘 방문</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">📢 오늘 방문 일정</span></div>
+        <div id="home-sched-list"><div style="text-align:center; padding:40px 0; color:var(--text-sub)">일정이 없습니다.</div></div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-seniors">
+      <div class="search-bar">
+        <i class="ti ti-search" style="font-size:20px; color:var(--text-sub)"></i>
+        <input type="text" id="search-input" placeholder="성함으로 검색하세요" oninput="filterSeniors()">
+      </div>
+      <button class="btn-add" onclick="openAddModal('senior')"><i class="ti ti-plus"></i> 새 어르신 등록</button>
+      <div id="seniors-list"></div>
+    </div>
+
+    <div class="section" id="sec-schedule">
+        <button class="btn-add" onclick="openAddModal('schedule')"><i class="ti ti-calendar-plus"></i> 방문 일정 예약</button>
+        <div id="schedule-list"></div>
+    </div>
+
+    <div class="section" id="sec-health">
+        <div id="health-list"></div>
+    </div>
+
+    <div class="section" id="sec-emergency">
+        <div id="emg-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-senior">
+  <div class="modal">
+    <div class="topbar-title" style="margin-bottom:24px">어르신 정보 등록</div>
+    <div class="form-group">
+        <label class="form-label">어르신 성함</label>
+        <input type="text" id="f-name" placeholder="성함을 입력하세요">
+    </div>
+    <div class="form-group">
+        <label class="form-label">춘천시 거주 주소</label>
+        <input type="text" id="f-addr" placeholder="상세 주소를 입력하세요">
+    </div>
+    <div style="display:flex; gap:16px">
+        <button class="btn-add" style="background:var(--border); color:var(--text-main)" onclick="closeModal('senior')">닫기</button>
+        <button class="btn-add" onclick="saveSenior()">등록하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* 기존 JavaScript 로직을 그대로 유지하되 디자인 요소와 연결 */
+const LS_S='welfare_seniors', LS_SC='welfare_schedules';
+const loadSeniors=()=>{try{return JSON.parse(localStorage.getItem(LS_S)||'[]')}catch{return[]}};
+const saveSeniors=l=>localStorage.setItem(LS_S,JSON.stringify(l));
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+function showTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  
+  const navMap = {home:0, seniors:1, schedule:2, health:3, emergency:4};
+  document.querySelectorAll('.nav-btn')[navMap[id]].classList.add('active');
+  
+  if(id==='seniors') renderSeniors(loadSeniors());
+  if(id==='home') renderHome();
+}
+
+function renderSeniors(list){
+  const el=document.getElementById('seniors-list');
+  if(!list.length){el.innerHTML='<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 정보가 없습니다.</div>';return;}
+  el.innerHTML=list.map(s=>`
+    <div class="card" style="padding:16px; margin-bottom:12px; display:flex; align-items:center; gap:16px" onclick="toast('${s.name} 어르신 상세 정보')">
+      <div class="avatar av-blue">${s.name.slice(0,1)}</div>
+      <div class="person-info">
+        <div class="person-name">${s.name} 어르신</div>
+        <div class="person-sub">${s.addr}</div>
+      </div>
+      <i class="ti ti-chevron-right" style="color:var(--border)"></i>
+    </div>`).join('');
+}
+
+function renderHome(){
+  const seniors = loadSeniors();
+  document.getElementById('cnt-total').textContent = seniors.length;
+}
+
+function saveSenior(){
+  const name=document.getElementById('f-name').value.trim();
+  const addr=document.getElementById('f-addr').value.trim();
+  if(!name){alert('성함을 입력해주세요.'); return;}
+  const list=loadSeniors();
+  list.push({id:Date.now(), name, addr});
+  saveSeniors(list);
+  closeModal('senior');
+  renderSeniors(list);
+  renderHome();
+  toast('등록되었습니다!');
+}
+
+function openAddModal(type){ document.getElementById('modal-'+type).classList.add('open'); }
+function closeModal(type){ document.getElementById('modal-'+type).classList.remove('open'); }
+
+// 초기 실행
+renderHome();
+</script>
+</body>
+</html>
