@@ -136,7 +136,7 @@ body{font-family:'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, san
     <div class="section" id="sec-seniors">
       <div class="search-bar">
         <i class="ti ti-search" style="font-size:20px; color:var(--text-sub)"></i>
-        <input type="text" id="search-input" placeholder="성함으로 검색하세요" oninput="filterSeniors()">
+        <input type="text" id="search-input" placeholder="이름/주소로 검색하세요" oninput="filterSeniors()">
       </div>
       <button class="btn-add" onclick="openAddModal('senior')"><i class="ti ti-plus"></i> 새 어르신 등록</button>
       <div id="seniors-list"></div>
@@ -148,7 +148,7 @@ body{font-family:'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, san
     </div>
 
     <div class="section" id="sec-health">
-        <div id="health-list"></div>
+        <button class="btn-add" onclick="openHealthModal()"><i class="ti ti-notes"></i> 건강 기록 추가</button><div id="health-list"></div>
     </div>
 
     <div class="section" id="sec-emergency">
@@ -193,120 +193,65 @@ body{font-family:'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, san
   </div>
 </div>
 
+
+<div class="modal-bg" id="modal-health">
+  <div class="modal">
+    <div class="topbar-title" style="margin-bottom:24px">건강 기록 입력</div>
+    <div class="form-group"><label class="form-label">어르신</label><select id="h-senior"></select></div>
+    <div class="form-group"><label class="form-label">혈압</label><input id="h-bp" placeholder="예: 125/82"></div>
+    <div class="form-group"><label class="form-label">혈당</label><input id="h-sugar" placeholder="예: 110"></div>
+    <div class="form-group"><label class="form-label">체온</label><input id="h-temp" placeholder="예: 36.5"></div>
+    <div class="form-group"><label class="form-label">특이사항</label><textarea id="h-note" placeholder="메모"></textarea></div>
+    <div style="display:flex; gap:16px">
+      <button class="btn-add" style="background:var(--border); color:var(--text-main)" onclick="closeModal('health')">닫기</button>
+      <button class="btn-add" onclick="saveHealth()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-detail">
+  <div class="modal">
+    <div class="topbar-title" id="d-name" style="margin-bottom:16px"></div>
+    <div id="d-tabs" style="display:flex; gap:8px; margin-bottom:14px"></div>
+    <div id="d-content"></div>
+    <button class="btn-add" style="background:var(--border); color:var(--text-main); margin-top:16px" onclick="closeModal('detail')">닫기</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
 /* 기존 JavaScript 로직을 그대로 유지하되 디자인 요소와 연결 */
-const LS_S='welfare_seniors', LS_SC='welfare_schedules';
+const LS_S='welfare_seniors', LS_SC='welfare_schedules', LS_H='welfare_health';
 const loadSeniors=()=>{try{return JSON.parse(localStorage.getItem(LS_S)||'[]')}catch{return[]}};
 const saveSeniors=l=>localStorage.setItem(LS_S,JSON.stringify(l));
-
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2200);
-}
-
-function showTab(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
-  
-  const navMap = {home:0, seniors:1, schedule:2, health:3, emergency:4};
-  document.querySelectorAll('.nav-btn')[navMap[id]].classList.add('active');
-  
-  if(id==='seniors') renderSeniors(loadSeniors());
-  if(id==='home') renderHome();
-}
-
-function renderSeniors(list){
-  const el=document.getElementById('seniors-list');
-  if(!list.length){el.innerHTML='<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 정보가 없습니다.</div>';return;}
-  el.innerHTML=list.map(s=>`
-    <div class="card" style="padding:16px; margin-bottom:12px; display:flex; align-items:center; gap:16px" onclick="toast('${s.name} 어르신 상세 정보')">
-      <div class="avatar av-blue">${s.name.slice(0,1)}</div>
-      <div class="person-info">
-        <div class="person-name">${s.name} 어르신</div>
-        <div class="person-sub">${s.addr}</div>
-      </div>
-      <i class="ti ti-chevron-right" style="color:var(--border)"></i>
-    </div>`).join('');
-}
-
-function renderHome(){
-  const seniors = loadSeniors();
-  const schedules = loadSchedules();
-  const today = new Date().toISOString().slice(0,10);
-  const todaySchedules = schedules.filter(s => s.date === today);
-  document.getElementById('cnt-total').textContent = seniors.length;
-  document.getElementById('cnt-today').textContent = todaySchedules.length;
-  const homeEl = document.getElementById('home-sched-list');
-  if(!todaySchedules.length){
-    homeEl.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--text-sub)">일정이 없습니다.</div>';
-    return;
-  }
-  homeEl.innerHTML = todaySchedules.map(s => `<div class="sched-item"><div><div class="sched-time">오늘 방문</div><div class="sched-name">${s.name} 어르신</div></div></div>`).join('');
-}
-
 const loadSchedules=()=>{try{return JSON.parse(localStorage.getItem(LS_SC)||'[]')}catch{return[]}};
 const saveSchedules=l=>localStorage.setItem(LS_SC,JSON.stringify(l));
+const loadHealth=()=>{try{return JSON.parse(localStorage.getItem(LS_H)||'[]')}catch{return[]}};
+const saveHealthList=l=>localStorage.setItem(LS_H,JSON.stringify(l));
 
-function renderSchedules(){
-  const el = document.getElementById('schedule-list');
-  const schedules = loadSchedules().sort((a,b)=>a.date.localeCompare(b.date));
-  if(!schedules.length){
-    el.innerHTML = '<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 일정이 없습니다.</div>';
-    return;
-  }
-  el.innerHTML = schedules.map(s => `<div class="sched-item"><div><div class="sched-time">${s.date}</div><div class="sched-name">${s.name} 어르신</div></div></div>`).join('');
-}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
-function saveSenior(){
-  const name=document.getElementById('f-name').value.trim();
-  const addr=document.getElementById('f-addr').value.trim();
-  if(!name){alert('성함을 입력해주세요.'); return;}
-  const list=loadSeniors();
-  list.push({id:Date.now(), name, addr});
-  saveSeniors(list);
-  closeModal('senior');
-  renderSeniors(list);
-  renderHome();
-  toast('등록되었습니다!');
-}
+function showTab(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');const navMap={home:0,seniors:1,schedule:2,health:3,emergency:4};document.querySelectorAll('.nav-btn')[navMap[id]].classList.add('active');if(id==='seniors') renderSeniors(loadSeniors());if(id==='home') renderHome();if(id==='schedule') renderSchedules();if(id==='health') renderHealth();if(id==='emergency') renderEmergency();}
 
-function openAddModal(type){ document.getElementById('modal-'+type).classList.add('open'); }
-function closeModal(type){ document.getElementById('modal-'+type).classList.remove('open'); }
+function renderSeniors(list){const q=(document.getElementById('search-input')?.value||'').trim();if(q){list=list.filter(s=>s.name.includes(q)||s.addr.includes(q));}const el=document.getElementById('seniors-list');if(!list.length){el.innerHTML='<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 정보가 없습니다.</div>';return;}el.innerHTML=list.map(s=>`<div class="card" style="padding:16px; margin-bottom:12px; display:flex; align-items:center; gap:16px" onclick="openDetail(${s.id})"><div class="avatar av-blue">${s.name.slice(0,1)}</div><div class="person-info"><div class="person-name">${s.name} 어르신</div><div class="person-sub">${s.addr}</div></div><i class="ti ti-chevron-right" style="color:var(--border)"></i></div>`).join('');}
+function filterSeniors(){renderSeniors(loadSeniors());}
 
-function saveSchedule(){
-  const name = document.getElementById('sc-senior').value;
-  const date = document.getElementById('sc-date').value;
-  if(!name){alert('어르신을 먼저 등록해주세요.'); return;}
-  if(!date){alert('방문 날짜를 선택해주세요.'); return;}
-  const list = loadSchedules();
-  list.push({id:Date.now(), name, date});
-  saveSchedules(list);
-  closeModal('schedule');
-  renderSchedules();
-  renderHome();
-  toast('방문 일정이 저장되었습니다!');
-}
+function renderHome(){const seniors=loadSeniors(),schedules=loadSchedules(),health=loadHealth();const today=new Date().toISOString().slice(0,10);const t=schedules.filter(s=>s.date===today);const urgent=t.filter(s=>s.urgent);const done=t.filter(s=>s.done);document.getElementById('cnt-total').textContent=seniors.length;document.getElementById('cnt-today').textContent=t.length;const homeEl=document.getElementById('home-sched-list');homeEl.innerHTML=`<div class="sched-item"><div><div class="sched-time">오늘 요약</div><div class="sched-name">방문예정 ${t.length} · 긴급 ${urgent.length} · 완료 ${done.length}</div></div></div>`+(t.map(s=>`<div class="sched-item" style="border:${s.urgent?'2px solid #C5221F':'1px solid var(--border)'}"><div><div class="sched-time">${s.date}</div><div class="sched-name">${s.name} 어르신 ${s.done?'(완료)':''}</div></div></div>`).join('')||'');}
 
-function fillScheduleSeniorOptions(){
-  const select = document.getElementById('sc-senior');
-  const seniors = loadSeniors();
-  if(!seniors.length){
-    select.innerHTML = '<option value="">등록된 어르신 없음</option>';
-    return;
-  }
-  select.innerHTML = seniors.map(s=>`<option value="${s.name}">${s.name} 어르신</option>`).join('');
-}
+function renderSchedules(){const el=document.getElementById('schedule-list');const schedules=loadSchedules().sort((a,b)=>a.date.localeCompare(b.date));if(!schedules.length){el.innerHTML='<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 일정이 없습니다.</div>';return;}el.innerHTML=schedules.map(s=>`<div class="sched-item" style="border:${s.urgent?'2px solid #C5221F':'1px solid var(--border)'}"><div style="flex:1"><div class="sched-time">${s.date}</div><div class="sched-name">${s.name} 어르신</div></div><span class="badge ${s.done?'badge-green':'badge-gray'}">${s.done?'완료':'예정'}</span></div>`).join('');}
 
-const _openAddModal = openAddModal;
-openAddModal = function(type){
-  if(type==='schedule') fillScheduleSeniorOptions();
-  _openAddModal(type);
-}
+function healthStatus(r){const t=parseFloat(r.temp||0),s=parseFloat(r.sugar||0);if(t>=38||s>=200)return ['긴급','badge-red'];if(t>=37.3||s>=140)return ['관찰 중','badge-gray'];return ['양호','badge-green'];}
+function renderHealth(){const el=document.getElementById('health-list');const list=loadHealth().reverse();if(!list.length){el.innerHTML='<div style="text-align:center; padding:60px 0; color:var(--text-sub)">건강 기록이 없습니다.</div>';return;}el.innerHTML=list.map(r=>{const [txt,cls]=healthStatus(r);return `<div class="sched-item"><div style="flex:1"><div class="sched-time">${r.name}</div><div class="person-sub">혈압 ${r.bp||'-'} / 혈당 ${r.sugar||'-'} / 체온 ${r.temp||'-'}℃<br>${r.note||''}</div></div><span class="badge ${cls}">${txt}</span></div>`}).join('');}
+function renderEmergency(){const el=document.getElementById('emg-list');const list=loadSeniors();if(!list.length){el.innerHTML='<div style="text-align:center; padding:60px 0; color:var(--text-sub)">등록된 어르신이 없습니다.</div>';return;}el.innerHTML=list.map(s=>`<div class="sched-item"><div style="flex:1"><div class="sched-name">${s.name} 어르신</div><div class="person-sub">가족: ${s.family||'-'} / 병원: ${s.hospital||'-'}</div></div></div>`).join('');}
 
+function saveSenior(){const name=document.getElementById('f-name').value.trim();const addr=document.getElementById('f-addr').value.trim();if(!name){alert('성함을 입력해주세요.');return;}const list=loadSeniors();list.push({id:Date.now(),name,addr,family:'',hospital:''});saveSeniors(list);closeModal('senior');renderSeniors(list);renderHome();toast('등록되었습니다!');}
+function openAddModal(type){if(type==='schedule')fillScheduleSeniorOptions();document.getElementById('modal-'+type).classList.add('open');}
+function closeModal(type){document.getElementById('modal-'+type).classList.remove('open');}
+function saveSchedule(){const name=document.getElementById('sc-senior').value;const date=document.getElementById('sc-date').value;const urgent=confirm('긴급 방문 건인가요? 확인=긴급, 취소=일반');if(!name||!date){alert('어르신과 날짜를 입력해주세요.');return;}const list=loadSchedules();list.push({id:Date.now(),name,date,urgent,done:false});saveSchedules(list);closeModal('schedule');renderSchedules();renderHome();toast('방문 일정이 저장되었습니다!');}
+function fillScheduleSeniorOptions(){const select=document.getElementById('sc-senior');const seniors=loadSeniors();select.innerHTML=seniors.length?seniors.map(s=>`<option value="${s.name}">${s.name} 어르신</option>`).join(''):'<option value="">등록된 어르신 없음</option>'; }
+function openHealthModal(){const select=document.getElementById('h-senior');const seniors=loadSeniors();select.innerHTML=seniors.map(s=>`<option value="${s.name}">${s.name} 어르신</option>`).join('');document.getElementById('modal-health').classList.add('open');}
+function saveHealth(){const r={id:Date.now(),name:document.getElementById('h-senior').value,bp:document.getElementById('h-bp').value,sugar:document.getElementById('h-sugar').value,temp:document.getElementById('h-temp').value,note:document.getElementById('h-note').value};const list=loadHealth();list.push(r);saveHealthList(list);closeModal('health');renderHealth();toast('건강 기록 저장 완료');}
+function openDetail(id){const s=loadSeniors().find(v=>v.id===id);if(!s)return;document.getElementById('d-name').textContent=`${s.name} 어르신 상세`;const tabs=[['basic','기본정보'],['health','건강'],['contact','연락처']];const tabEl=document.getElementById('d-tabs');const content=document.getElementById('d-content');function draw(t){tabEl.innerHTML=tabs.map(([k,n])=>`<button class="badge ${k===t?'badge-green':'badge-gray'}" onclick="window._drawDetail('${t}',${id})">${n}</button>`).join(' ');if(t==='basic')content.innerHTML=`<div class="card" style="padding:16px">이름: ${s.name}<br>주소: ${s.addr}</div>`;if(t==='health'){const r=loadHealth().filter(h=>h.name===s.name).slice(-3).reverse();content.innerHTML=r.length?r.map(v=>`<div class="sched-item"><div>${v.bp||'-'} / ${v.sugar||'-'} / ${v.temp||'-'}℃<br>${v.note||''}</div></div>`).join(''):'건강기록 없음';}if(t==='contact')content.innerHTML=`<div class="card" style="padding:16px">가족 연락처: ${s.family||'-'}<br>병원 연락처: ${s.hospital||'-'}</div>`;}window._drawDetail=draw;draw('basic');document.getElementById('modal-detail').classList.add('open');}
 // 초기 실행
 renderHome();
 renderSchedules();
