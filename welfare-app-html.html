@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재가복지 관리 — 소양강댐노인복지관</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a}
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:600px;margin:0 auto;background:#f5f5f0}
+.topbar{background:#fff;border-bottom:0.5px solid #e0ddd6;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.topbar-title{font-size:16px;font-weight:500}
+.topbar-sub{font-size:12px;color:#888;margin-top:2px}
+.nav{display:flex;background:#fff;border-bottom:0.5px solid #e0ddd6;position:sticky;top:57px;z-index:5}
+.nav-btn{flex:1;padding:10px 4px;font-size:11px;color:#888;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav-btn.active{color:#185FA5;border-bottom-color:#185FA5}
+.nav-btn i{font-size:18px}
+.content{flex:1;padding:12px}
+.section{display:none}
+.section.active{display:block}
+.card{background:#fff;border:0.5px solid #e0ddd6;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card-title{font-size:14px;font-weight:500}
+.badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
+.badge-green{background:#EAF3DE;color:#3B6D11}
+.badge-amber{background:#FAEEDA;color:#854F0B}
+.badge-red{background:#FCEBEB;color:#A32D2D}
+.badge-blue{background:#E6F1FB;color:#185FA5}
+.badge-purple{background:#EEEDFE;color:#534AB7}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0}
+.av-blue{background:#E6F1FB;color:#185FA5}
+.av-teal{background:#E1F5EE;color:#0F6E56}
+.av-purple{background:#EEEDFE;color:#534AB7}
+.av-coral{background:#FAECE7;color:#993C1D}
+.person-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #e0ddd6;cursor:pointer}
+.person-row:last-child{border-bottom:none}
+.person-info{flex:1;min-width:0}
+.person-name{font-size:14px;font-weight:500}
+.person-sub{font-size:12px;color:#888;margin-top:2px}
+.btn-add{display:flex;align-items:center;gap:6px;background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:12px}
+.search-bar{display:flex;align-items:center;gap:8px;background:#fff;border:0.5px solid #e0ddd6;border-radius:8px;padding:8px 12px;margin-bottom:12px}
+.search-bar input{border:none;background:none;flex:1;font-size:13px;outline:none}
+.sched-item{background:#fff;border-left:3px solid #185FA5;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:8px;border-top:0.5px solid #e0ddd6;border-right:0.5px solid #e0ddd6;border-bottom:0.5px solid #e0ddd6}
+.sched-item.urgent{border-left-color:#E24B4A}
+.sched-time{font-size:11px;color:#888;margin-bottom:3px}
+.sched-name{font-size:14px;font-weight:500}
+.sched-type{font-size:12px;color:#888}
+.schedule-day{font-size:12px;font-weight:500;color:#888;margin:10px 0 6px}
+.health-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #e0ddd6}
+.health-row:last-child{border-bottom:none}
+.health-label{font-size:13px;color:#888}
+.health-val{font-size:13px;font-weight:500}
+.emg-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid #e0ddd6}
+.emg-row:last-child{border-bottom:none}
+.emg-info{flex:1}
+.emg-name{font-size:14px;font-weight:500}
+.emg-rel{font-size:12px;color:#888}
+.call-btn{background:#EAF3DE;border:none;border-radius:8px;padding:7px 10px;color:#3B6D11;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;text-decoration:none}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.stat-card{background:#ebebeb;border-radius:8px;padding:12px}
+.stat-num{font-size:24px;font-weight:500}
+.stat-label{font-size:12px;color:#888;margin-top:2px}
+.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:20;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:100%;max-width:440px;margin:auto}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:14px}
+.form-group{margin-bottom:11px}
+.form-label{font-size:12px;color:#888;margin-bottom:4px;display:block}
+.form-group input,.form-group select{width:100%;font-size:13px;border:0.5px solid #ccc;border-radius:8px;padding:8px 10px;outline:none;background:#fff}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.section-divider{font-size:11px;font-weight:500;color:#888;border-bottom:0.5px solid #e0ddd6;padding-bottom:6px;margin:14px 0 10px;letter-spacing:0.5px}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cb-label{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:#f5f5f0;border:0.5px solid #e0ddd6;border-radius:8px;padding:5px 10px}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.btn-cancel{background:none;border:0.5px solid #ccc;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;color:#888}
+.btn-save{background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer}
+.detail-modal{max-width:460px}
+.tab-row{display:flex;gap:4px;margin-bottom:14px;border-bottom:0.5px solid #e0ddd6}
+.tab{padding:8px 12px;font-size:13px;color:#888;cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none}
+.tab.active{color:#185FA5;border-bottom-color:#185FA5}
+.detail-section{display:none}
+.detail-section.active{display:block}
+.field-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:13px}
+.field-label{color:#888;min-width:80px;flex-shrink:0;padding-top:1px}
+.field-val{flex:1}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:99;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">재가복지 관리</div>
+      <div class="topbar-sub">소양강댐노인복지관</div>
+    </div>
+    <i class="ti ti-bell" style="font-size:20px;color:#888"></i>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('home')"><i class="ti ti-home"></i>홈</button>
+    <button class="nav-btn" onclick="showTab('seniors')"><i class="ti ti-users"></i>어르신</button>
+    <button class="nav-btn" onclick="showTab('schedule')"><i class="ti ti-calendar"></i>일정</button>
+    <button class="nav-btn" onclick="showTab('health')"><i class="ti ti-heart-rate-monitor"></i>건강</button>
+    <button class="nav-btn" onclick="showTab('emergency')"><i class="ti ti-phone-call"></i>긴급</button>
+  </div>
+
+  <div class="content">
+
+    <!-- 홈 -->
+    <div class="section active" id="sec-home">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num" id="cnt-total">0</div><div class="stat-label">전체 어르신</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#185FA5" id="cnt-today">0</div><div class="stat-label">오늘 방문 예정</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#E24B4A" id="cnt-urgent">0</div><div class="stat-label">긴급 확인 필요</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#3B6D11" id="cnt-done">0</div><div class="stat-label">방문 완료</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">오늘 등록된 어르신</span></div>
+        <div id="home-list" style="color:#888;font-size:13px">어르신 탭에서 등록해주세요.</div>
+      </div>
+    </div>
+
+    <!-- 어르신 -->
+    <div class="section" id="sec-seniors">
+      <div class="search-bar">
+        <i class="ti ti-search" style="color:#888;font-size:16px"></i>
+        <input type="text" id="search-input" placeholder="이름 또는 주소 검색" oninput="filterSeniors()">
+      </div>
+      <button class="btn-add" onclick="openAddModal()"><i class="ti ti-plus"></i> 어르신 등록</button>
+      <div class="card" style="padding:0 16px"><div id="seniors-list"></div></div>
+    </div>
+
+    <!-- 일정 -->
+    <div class="section" id="sec-schedule">
+      <div id="schedule-list"><div style="color:#888;font-size:13px;padding:20px 0;text-align:center">등록된 일정이 없습니다.</div></div>
+    </div>
+
+    <!-- 건강 -->
+    <div class="section" id="sec-health">
+      <div id="health-list"><div style="color:#888;font-size:13px;padding:20px 0;text-align:center">등록된 어르신이 없습니다.</div></div>
+    </div>
+
+    <!-- 긴급 -->
+    <div class="section" id="sec-emergency">
+      <div id="emg-list"><div style="color:#888;font-size:13px;padding:20px 0;text-align:center">등록된 연락처가 없습니다.</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 등록 모달 -->
+<div class="modal-bg" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">어르신 등록</div>
+    <div class="section-divider">기본 정보</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">성함</label><input type="text" id="f-name" placeholder="홍길동"></div>
+      <div class="form-group"><label class="form-label">나이</label><input type="number" id="f-age" placeholder="75"></div>
+    </div>
+    <div class="form-group"><label class="form-label">주소</label><input type="text" id="f-addr" placeholder="춘천시 효자동 123"></div>
+    <div class="form-group"><label class="form-label">담당 사회복지사</label><input type="text" id="f-worker" placeholder="이민정"></div>
+
+    <div class="section-divider">수급 유형 (해당 항목 모두 선택)</div>
+    <div class="checkbox-group" id="benefit-checks">
+      <label class="cb-label"><input type="checkbox" value="수급대상"> 수급대상</label>
+      <label class="cb-label"><input type="checkbox" value="기초연금"> 기초연금</label>
+      <label class="cb-label"><input type="checkbox" value="차상위"> 차상위</label>
+      <label class="cb-label"><input type="checkbox" value="장애1급"> 장애 1급</label>
+      <label class="cb-label"><input type="checkbox" value="장애2급"> 장애 2급</label>
+      <label class="cb-label"><input type="checkbox" value="장애3급"> 장애 3급</label>
+      <label class="cb-label"><input type="checkbox" value="장애4급"> 장애 4급</label>
+      <label class="cb-label"><input type="checkbox" value="장애5급"> 장애 5급</label>
+      <label class="cb-label"><input type="checkbox" value="장애6급"> 장애 6급</label>
+    </div>
+
+    <div class="section-divider">가족 형태</div>
+    <div class="form-group">
+      <select id="f-family">
+        <option value="">선택</option>
+        <option value="독거">독거</option>
+        <option value="노인부부">노인부부</option>
+        <option value="자녀동거">자녀동거</option>
+        <option value="손자녀동거">손자녀동거</option>
+        <option value="기타가족동거">기타 가족동거</option>
+        <option value="시설입소">시설입소</option>
+      </select>
+    </div>
+
+    <div class="section-divider">건강 정보</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">혈압 (예: 128/76)</label><input type="text" id="f-bp" placeholder="128/76"></div>
+      <div class="form-group"><label class="form-label">혈당 (mg/dL)</label><input type="text" id="f-bs" placeholder="105"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">체온 (°C)</label><input type="text" id="f-temp" placeholder="36.5"></div>
+      <div class="form-group"><label class="form-label">건강 상태</label>
+        <select id="f-status">
+          <option value="양호">양호</option>
+          <option value="관찰 중">관찰 중</option>
+          <option value="긴급">긴급</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">특이사항</label><input type="text" id="f-note" placeholder="특이사항 입력"></div>
+
+    <div class="section-divider">긴급 연락처</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">성함</label><input type="text" id="f-cname" placeholder="김민준"></div>
+      <div class="form-group"><label class="form-label">관계</label><input type="text" id="f-crel" placeholder="자녀 (아들)"></div>
+    </div>
+    <div class="form-group"><label class="form-label">전화번호</label><input type="tel" id="f-cphone" placeholder="010-0000-0000"></div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">취소</button>
+      <button class="btn-save" onclick="saveSenior()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- 상세 모달 -->
+<div class="modal-bg" id="detail-modal">
+  <div class="modal detail-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar av-blue" id="d-avatar"></div>
+        <div>
+          <div style="font-size:15px;font-weight:500" id="d-name"></div>
+          <div style="font-size:12px;color:#888" id="d-sub"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="deleteCurrentSenior()" style="background:none;border:none;cursor:pointer;color:#E24B4A;font-size:13px"><i class="ti ti-trash" style="font-size:16px"></i></button>
+        <button onclick="closeDetailModal()" style="background:none;border:none;cursor:pointer;color:#888"><i class="ti ti-x" style="font-size:20px"></i></button>
+      </div>
+    </div>
+    <div class="tab-row">
+      <button class="tab active" onclick="showDetailTab('info')">기본 정보</button>
+      <button class="tab" onclick="showDetailTab('health')">건강 기록</button>
+      <button class="tab" onclick="showDetailTab('contact')">연락처</button>
+    </div>
+    <div class="detail-section active" id="dt-info">
+      <div class="field-row"><span class="field-label">주소</span><span class="field-val" id="d-addr"></span></div>
+      <div class="field-row"><span class="field-label">수급 유형</span><span class="field-val" id="d-benefits"></span></div>
+      <div class="field-row"><span class="field-label">가족 형태</span><span class="field-val" id="d-family"></span></div>
+      <div class="field-row"><span class="field-label">담당자</span><span class="field-val" id="d-worker"></span></div>
+      <div class="field-row"><span class="field-label">상태</span><span class="field-val" id="d-status"></span></div>
+    </div>
+    <div class="detail-section" id="dt-health">
+      <div class="health-row"><span class="health-label">혈압</span><span class="health-val" id="d-bp"></span></div>
+      <div class="health-row"><span class="health-label">혈당</span><span class="health-val" id="d-bs"></span></div>
+      <div class="health-row"><span class="health-label">체온</span><span class="health-val" id="d-temp"></span></div>
+      <div class="health-row"><span class="health-label">특이사항</span><span class="health-val" id="d-note"></span></div>
+    </div>
+    <div class="detail-section" id="dt-contact">
+      <div class="emg-row" style="padding:8px 0">
+        <div class="avatar av-blue" style="width:36px;height:36px;font-size:13px"><i class="ti ti-user"></i></div>
+        <div class="emg-info"><div class="emg-name" id="d-cname"></div><div class="emg-rel" id="d-crel"></div></div>
+        <a class="call-btn" id="d-cphone" href="#"><i class="ti ti-phone"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const avColors=['av-blue','av-teal','av-purple','av-coral'];
+const statusClassMap={'양호':'badge-green','관찰 중':'badge-amber','긴급':'badge-red'};
+let currentDetailId=null;
+
+function loadSeniors(){
+  try{return JSON.parse(localStorage.getItem('welfare_seniors')||'[]')}catch{return []}
+}
+function saveSeniors(list){
+  localStorage.setItem('welfare_seniors',JSON.stringify(list));
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+function benefitBadge(b){
+  const m={'수급대상':'badge-red','기초연금':'badge-blue','차상위':'badge-amber'};
+  const cls=b.startsWith('장애')?'badge-purple':(m[b]||'badge-gray');
+  return `<span class="badge ${cls}" style="margin-right:3px;margin-bottom:3px">${b}</span>`;
+}
+
+function renderHome(){
+  const list=loadSeniors();
+  document.getElementById('cnt-total').textContent=list.length;
+  document.getElementById('cnt-urgent').textContent=list.filter(s=>s.status==='긴급').length;
+  document.getElementById('cnt-today').textContent=list.length;
+  document.getElementById('cnt-done').textContent=list.filter(s=>s.status==='양호').length;
+  const el=document.getElementById('home-list');
+  if(!list.length){el.innerHTML='<div style="color:#888;font-size:13px">어르신 탭에서 등록해주세요.</div>';return;}
+  el.innerHTML=list.map(s=>`
+    <div class="person-row" onclick="openDetail(${s.id})">
+      <div class="avatar ${avColors[s.avIdx%4]}">${s.name.slice(0,2)}</div>
+      <div class="person-info">
+        <div class="person-name">${s.name} (${s.age}세)</div>
+        <div class="person-sub">${s.addr}</div>
+      </div>
+      <span class="badge ${statusClassMap[s.status]||'badge-gray'}">${s.status}</span>
+    </div>`).join('');
+}
+
+function renderSeniors(list){
+  const el=document.getElementById('seniors-list');
+  if(!list.length){el.innerHTML='<div style="color:#888;font-size:13px;padding:16px 0">등록된 어르신이 없습니다.</div>';return;}
+  el.innerHTML=list.map(s=>`
+    <div class="person-row" onclick="openDetail(${s.id})">
+      <div class="avatar ${avColors[s.avIdx%4]}">${s.name.slice(0,2)}</div>
+      <div class="person-info">
+        <div class="person-name">${s.name} (${s.age}세) <span class="badge badge-gray" style="margin-left:4px">${s.family||'-'}</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px">${(s.benefits||[]).map(benefitBadge).join('')}</div>
+        <div class="person-sub" style="margin-top:3px">${s.addr} · ${s.worker}</div>
+      </div>
+      <span class="badge ${statusClassMap[s.status]||'badge-gray'}" style="flex-shrink:0;margin-left:6px">${s.status}</span>
+    </div>`).join('');
+}
+
+function renderHealth(){
+  const list=loadSeniors();
+  const el=document.getElementById('health-list');
+  if(!list.length){el.innerHTML='<div style="color:#888;font-size:13px;padding:20px 0;text-align:center">등록된 어르신이 없습니다.</div>';return;}
+  el.innerHTML=list.map(s=>`
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="avatar ${avColors[s.avIdx%4]}">${s.name.slice(0,2)}</div>
+          <div><div class="card-title">${s.name} (${s.age}세)</div><div style="font-size:12px;color:#888">최근 기록</div></div>
+        </div>
+        <span class="badge ${statusClassMap[s.status]||'badge-gray'}">${s.status}</span>
+      </div>
+      <div class="health-row"><span class="health-label">혈압</span><span class="health-val">${s.bp||'-'} mmHg</span></div>
+      <div class="health-row"><span class="health-label">혈당</span><span class="health-val">${s.bs||'-'} mg/dL</span></div>
+      <div class="health-row"><span class="health-label">체온</span><span class="health-val">${s.temp||'-'}°C</span></div>
+      <div class="health-row"><span class="health-label">특이사항</span><span class="health-val">${s.note||'-'}</span></div>
+    </div>`).join('');
+}
+
+function renderEmergency(){
+  const list=loadSeniors();
+  const el=document.getElementById('emg-list');
+  if(!list.length){el.innerHTML='<div style="color:#888;font-size:13px;padding:20px 0;text-align:center">등록된 연락처가 없습니다.</div>';return;}
+  el.innerHTML=list.map(s=>`
+    <div class="card">
+      <div class="card-header"><span class="card-title">${s.name} 어르신</span><span class="badge ${statusClassMap[s.status]||'badge-gray'}">${s.status}</span></div>
+      <div class="emg-row">
+        <div class="avatar av-blue" style="width:36px;height:36px;font-size:13px"><i class="ti ti-user"></i></div>
+        <div class="emg-info"><div class="emg-name">${s.cName||'-'}</div><div class="emg-rel">${s.cRel||'-'}</div></div>
+        <a class="call-btn" href="tel:${s.cPhone||''}"><i class="ti ti-phone"></i> ${s.cPhone||'-'}</a>
+      </div>
+      <div class="emg-row">
+        <div class="avatar av-red" style="width:36px;height:36px;font-size:13px;background:#FCEBEB;color:#A32D2D"><i class="ti ti-ambulance"></i></div>
+        <div class="emg-info"><div class="emg-name">119 응급</div><div class="emg-rel">긴급구조</div></div>
+        <a class="call-btn" style="background:#FCEBEB;color:#A32D2D" href="tel:119"><i class="ti ti-phone"></i> 119</a>
+      </div>
+    </div>`).join('');
+}
+
+function filterSeniors(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  renderSeniors(loadSeniors().filter(s=>s.name.includes(q)||s.addr.toLowerCase().includes(q)));
+}
+
+function showTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const nm={home:0,seniors:1,schedule:2,health:3,emergency:4};
+  document.querySelectorAll('.nav-btn')[nm[id]].classList.add('active');
+  if(id==='seniors') renderSeniors(loadSeniors());
+  if(id==='health') renderHealth();
+  if(id==='emergency') renderEmergency();
+  if(id==='home') renderHome();
+}
+
+function openAddModal(){document.getElementById('add-modal').classList.add('open')}
+function closeAddModal(){document.getElementById('add-modal').classList.remove('open')}
+
+function saveSenior(){
+  const name=document.getElementById('f-name').value.trim();
+  const age=document.getElementById('f-age').value;
+  if(!name||!age){alert('성함과 나이를 입력해주세요.');return;}
+  const list=loadSeniors();
+  const checked=Array.from(document.querySelectorAll('#benefit-checks input:checked')).map(c=>c.value);
+  list.push({
+    id:Date.now(),name,age:parseInt(age),
+    addr:document.getElementById('f-addr').value.trim()||'주소 미입력',
+    benefits:checked.length?checked:['해당없음'],
+    family:document.getElementById('f-family').value||'미입력',
+    worker:document.getElementById('f-worker').value.trim()||'미배정',
+    status:document.getElementById('f-status').value||'양호',
+    bp:document.getElementById('f-bp').value.trim()||'-',
+    bs:document.getElementById('f-bs').value.trim()||'-',
+    temp:document.getElementById('f-temp').value.trim()||'-',
+    note:document.getElementById('f-note').value.trim()||'-',
+    cName:document.getElementById('f-cname').value.trim()||'-',
+    cRel:document.getElementById('f-crel').value.trim()||'-',
+    cPhone:document.getElementById('f-cphone').value.trim()||'-',
+    avIdx:list.length%4
+  });
+  saveSeniors(list);
+  renderSeniors(list);
+  renderHome();
+  ['f-name','f-age','f-addr','f-worker','f-bp','f-bs','f-temp','f-note','f-cname','f-crel','f-cphone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-family').value='';
+  document.getElementById('f-status').value='양호';
+  document.querySelectorAll('#benefit-checks input').forEach(c=>c.checked=false);
+  closeAddModal();
+  toast('어르신이 등록되었습니다.');
+}
+
+function openDetail(id){
+  const s=loadSeniors().find(x=>x.id===id);if(!s)return;
+  currentDetailId=id;
+  document.getElementById('d-avatar').textContent=s.name.slice(0,2);
+  document.getElementById('d-avatar').className='avatar '+avColors[s.avIdx%4];
+  document.getElementById('d-name').textContent=s.name;
+  document.getElementById('d-sub').textContent=s.age+'세 · '+s.family;
+  document.getElementById('d-addr').textContent=s.addr;
+  document.getElementById('d-benefits').innerHTML=(s.benefits||[]).map(benefitBadge).join('');
+  document.getElementById('d-family').textContent=s.family||'-';
+  document.getElementById('d-worker').textContent=s.worker;
+  document.getElementById('d-status').innerHTML=`<span class="badge ${statusClassMap[s.status]||'badge-gray'}">${s.status}</span>`;
+  document.getElementById('d-bp').textContent=(s.bp||'-')+' mmHg';
+  document.getElementById('d-bs').textContent=(s.bs||'-')+' mg/dL';
+  document.getElementById('d-temp').textContent=(s.temp||'-')+'°C';
+  document.getElementById('d-note').textContent=s.note||'-';
+  document.getElementById('d-cname').textContent=s.cName||'-';
+  document.getElementById('d-crel').textContent=s.cRel||'-';
+  const ph=document.getElementById('d-cphone');
+  ph.innerHTML=`<i class="ti ti-phone"></i> ${s.cPhone||'-'}`;
+  ph.href=s.cPhone?'tel:'+s.cPhone:'#';
+  showDetailTab('info');
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function deleteCurrentSenior(){
+  if(!currentDetailId)return;
+  if(!confirm('이 어르신 정보를 삭제하시겠습니까?'))return;
+  const list=loadSeniors().filter(s=>s.id!==currentDetailId);
+  saveSeniors(list);
+  closeDetailModal();
+  renderSeniors(list);
+  renderHome();
+  toast('삭제되었습니다.');
+}
+
+function closeDetailModal(){document.getElementById('detail-modal').classList.remove('open');currentDetailId=null;}
+
+function showDetailTab(t){
+  document.querySelectorAll('.detail-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('dt-'+t).classList.add('active');
+  const idx={info:0,health:1,contact:2};
+  document.querySelectorAll('.tab')[idx[t]].classList.add('active');
+}
+
+renderHome();
+</script>
+</body>
+</html>
