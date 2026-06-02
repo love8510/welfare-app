@@ -27,7 +27,8 @@ export async function GET(request: Request) {
   const verifyUrl = new URL('/auth/v1/verify', process.env.NEXT_PUBLIC_SUPABASE_URL!)
   verifyUrl.searchParams.set('token', data.properties.hashed_token)
   verifyUrl.searchParams.set('type', 'magiclink')
-  verifyUrl.searchParams.set('redirect_to', new URL(redirect, request.url).toString())
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin
+  verifyUrl.searchParams.set('redirect_to', new URL(redirect, siteUrl).toString())
 
   return NextResponse.redirect(verifyUrl)
 }
